@@ -1,6 +1,6 @@
 # A map of Synapses with federation enabled.
 
-Map page thing code stolen from https://github.com/Leaflet/Leaflet.markercluster
+Map page thing stolen from https://github.com/Leaflet/Leaflet.markercluster
 
 Data from Shodan.
 
