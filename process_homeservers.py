@@ -35,6 +35,7 @@ def file_len(f_name):
     '''
     with open(f_name) as f:
         for i, l in enumerate(f):
+            l = l
             pass
     return i + 1
 
@@ -84,7 +85,7 @@ def curl(line):
         if 404 in r or '404' in r.content.decode('ISO-8859-1'):
             try: # Try and look up SRV record
                 srv = srvlookup.lookup('matrix', 'TCP', homeserver)
-            except srvlookup.SRVQueryFailure as e: # SRV lookup fail (except no record found)
+            except srvlookup.SRVQueryFailure: # SRV lookup fail (except no record found)
                 return('')
             else: # SRV lookup returns something
                 if 'Error querying SRV' not in srv[0]: # Successful SRV lookup
