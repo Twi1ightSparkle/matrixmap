@@ -6,28 +6,10 @@ import random
 from concurrent.futures import ThreadPoolExecutor
 
 ## Import other python files
-from util import delegated_hostname
-from util import resolve_server
-
+from util import import_hostnames
+from util import resolve_hostname
 
 ## Functions
-
-def file_len(f_name):
-    """Count lines in a file
-
-    Args:
-        f_name: Full path to a text file
-    
-    Returns:
-        An integer
-    """
-
-    with open(f_name) as f:
-        for i, l in enumerate(f):
-            l = l
-            pass
-    return i + 1
-
 
 async def get_data_asynchronous(workers):
     with ThreadPoolExecutor(max_workers=workers) as executor:
@@ -36,7 +18,7 @@ async def get_data_asynchronous(workers):
         tasks = [
             loop.run_in_executor(
                 executor,
-                resolve_server.check_matrix_server,
+                resolve_hostname.check_matrix_server,
                 hostname # Allows us to pass in multiple arguments
             )
             for hostname in hostnames
@@ -106,10 +88,10 @@ if __name__ == "__main__":
     
     # Load hostnames
     hostnames = []
-    hostnames_from_file = delegated_hostname.load_file(hostnames_file_path)
+    hostnames_from_file = import_hostnames.load_file(hostnames_file_path)
     hostnames_from_postgres = False
     if try_sql:
-        hostnames_from_postgres = delegated_hostname.get_hostnames_from_postgres(conf_psql_server,
+        hostnames_from_postgres = import_hostnames.get_hostnames_from_postgres(conf_psql_server,
                                                                                 conf_psql_port,
                                                                                 conf_psql_database,
                                                                                 conf_psql_username,

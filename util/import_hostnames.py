@@ -63,6 +63,23 @@ def get_hostnames_from_postgres(server, port, database, username, password, limi
             pass
 
 
+def file_len(f_name):
+    """Count lines in a file
+
+    Args:
+        f_name: Full path to a text file
+    
+    Returns:
+        An integer
+    """
+
+    with open(f_name) as f:
+        for i, l in enumerate(f):
+            l = l
+            pass
+    return i + 1
+
+
 def load_file(file_path):
     """Load file to list
 

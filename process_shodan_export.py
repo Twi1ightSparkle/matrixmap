@@ -17,7 +17,7 @@ except ImportError:
 
 
 ## Import other python files
-from util import delegated_hostname
+from util import import_hostnames
 
 
 ## Functions
@@ -108,7 +108,7 @@ if __name__ == "__main__":
         exit(1)
 
     # Load Shodan export json
-    lines = delegated_hostname.load_file(shodan_export_file_path)
+    lines = import_hostnames.load_file(shodan_export_file_path)
 
     # Quit if the file set in shodan_export_file_path could not be found
     if not lines:

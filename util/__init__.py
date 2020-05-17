@@ -1,3 +1,3 @@
-from . import delegated_hostname
-from . import resolve_server
+from . import import_hostnames
+from . import resolve_hostname
 from . import write_web_data
