@@ -1,6 +1,9 @@
+__pycache__
 .DS_Store
+config.ini
+domains.txt
+homeservers.txt
+server_details.csv
 shodan-export-port-8448.json
 shodan-export-port-8448.json.gz
-domains.txt
-info.csv
-homeservers.txt
+shodan-export-port-8448 copy.json
