@@ -1,6 +1,6 @@
 [Global]
 # Set the directory relative to this script where data is stored
-data_directory : data                   
+data_directory : data
 
 
 [PostgreSQL]
