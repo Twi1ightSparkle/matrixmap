@@ -1,5 +1,5 @@
 [Global]
-# Set the directory relative to this scipt where data is stored
+# Set the directory relative to this script where data is stored
 data_directory : data                   
 
 
@@ -14,7 +14,7 @@ port: 5432
 database: synapse
 # Username to authenticate with
 username: someuser
-# Password to authenticate with. %must be escaped with another %
+# Password to authenticate with. % must be escaped with another %
 password: somepassword
 # Limit how many results to return from destinations table
 limit: 1000
@@ -40,5 +40,5 @@ workers: 100
 [ProcessHomeservers]
 # How many workers to run process_homeservers.py with. Must be an integer
 workers: 100
-# Print a header to stdout. Diable when saving do a file. [Yes/No]
+# Print a header to stdout. Disable when saving do a file. [Yes/No]
 debug: No
