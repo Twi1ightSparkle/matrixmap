@@ -28,7 +28,7 @@ def detect_matrix(line):
     Try and determine if a Matrix server is running on this IP.
 
     Args:
-        line: a text string
+        line: A text string.
 
     Returns:
         json response
@@ -90,15 +90,15 @@ if __name__ == "__main__":
     config.read(os.path.join(work_dir, 'config.ini'))
     
     conf_global_data_directory = config.get('Global', 'data_directory')
-    conf_shodan_filename = config.get('ProcessShodanExport', 'filename')
+    conf_files_shodan_filename = config.get('Files', 'shodan_filename')
     try:
-        conf_shodan_workers = int(config.get('ProcessShodanExport', 'workers'))
+        conf_settings_workers = int(config.get('Settings', 'shodan_workers'))
     except ValueError:
         print('Config error. Shodan: workers must be an integer')
         exit(1)
 
     # Paths
-    shodan_export_file_path = os.path.join(work_dir, conf_global_data_directory, conf_shodan_filename)
+    shodan_export_file_path = os.path.join(work_dir, conf_global_data_directory, conf_files_shodan_filename)
 
     # Split into workers
     try:
@@ -108,7 +108,7 @@ if __name__ == "__main__":
         exit(1)
 
     # Load Shodan export json
-    lines = import_hostnames.load_file(shodan_export_file_path)
+    lines = import_hostnames.load_shodan_file(shodan_export_file_path)
 
     # Quit if the file set in shodan_export_file_path could not be found
     if not lines:
@@ -124,5 +124,5 @@ if __name__ == "__main__":
 
     # Process
     loop = asyncio.get_event_loop()
-    future = asyncio.ensure_future(get_data_asynchronous(conf_shodan_workers))
+    future = asyncio.ensure_future(get_data_asynchronous(conf_settings_workers))
     loop.run_until_complete(future)

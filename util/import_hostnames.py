@@ -1,4 +1,5 @@
 ## Import modules
+import json
 import os
 import psycopg2
 
@@ -8,7 +9,8 @@ import psycopg2
 def get_hostnames_from_postgres(server, port, database, username, password, limit=None, ):
     """Get hostnames from PostgreSQL
 
-    Try and connect to PostgreSQL database, then get hostnames from table destinations
+    Try and connect to PostgreSQL database, then get hostnames from table destinations.
+    List stripped of shitespace before returning.
 
     Args:
         server: IP or fqdn for PostgreSQL server
@@ -22,7 +24,7 @@ def get_hostnames_from_postgres(server, port, database, username, password, limi
         List of hostnames. None if any error occurred or destinations table is empty
     """
 
-    hostnames = []
+    temp = []
 
     # Try and get stuff from the datbase
     try:
@@ -38,19 +40,25 @@ def get_hostnames_from_postgres(server, port, database, username, password, limi
         mobile_records = cursor.fetchall() 
         
         for row in mobile_records:
-            hostnames.append(row[0])
+            temp.append(row[0])
 
     # If any error, print the error and return None
     except (Exception, psycopg2.Error) as error :
         print ('Error while fetching data from PostgreSQL', error)
-        return(None)
+        cont = input('\nType yes if you would like to continue, or no to exit: ')
+        if cont.lower() == 'yes':
+            return(None)
+        exit(0)
     
     # If no errors, return stuff
     else:
-        if len(hostnames) < 1:
+        if len(temp) < 1:
             print("Destinations table is empty")
             return(None)
         else:
+            hostnames = []
+            for x in temp:
+                hostnames.append(x.strip())
             return(hostnames)
 
     # Close database connection
@@ -61,6 +69,66 @@ def get_hostnames_from_postgres(server, port, database, username, password, limi
                 connection.close()
         except UnboundLocalError:
             pass
+
+
+
+def load_hostnames_file(file_path):
+    """Load file to list
+
+    If supplied file exist, load it to a list. LF style new line separated. List stripped of whitespace before returning.
+
+    Args:
+        file_path: Full path to a text file.
+    
+    Returns:
+        List of all lines in the file. Or None if the file does not exist.
+    
+    """
+
+    # Check if the file exist
+    if not os.path.isfile(file_path):
+        return(None)
+
+    # Else load the file
+    f = open(file_path, 'r')
+    temp = [line for line in f]
+    f.close()
+
+    lines = []
+    for x in temp:
+        lines.append(x.strip())
+    return(lines)
+
+
+def load_shodan_file(file_path):
+    """Load Shodan export file
+
+    If supplied Shodan export file file exist, load IP addresses from it to a list.
+
+    Args:
+        file_path: Full path to a Shodan data export json file.
+    
+    Returns:
+        All IP addresses from said file. Or None if file does not exist.
+    """
+
+    # Check if the file exist
+    if not os.path.isfile(file_path):
+        return(None)
+    
+    # Else load the file
+    f = open(file_path, 'r')
+    temp = [line for line in f]
+    f.close()
+
+    # Extract IPs
+    lines = []
+    for line in temp:
+        data = json.loads(line)
+        if data['transport'] == 'tcp':
+            lines.append(str(data['ip_str']).strip())
+    
+    return(lines)
 
 
 def file_len(f_name):
@@ -80,25 +148,14 @@ def file_len(f_name):
     return i + 1
 
 
-def load_file(file_path):
-    """Load file to list
-
-    If supplied file exist, load it to a list. LF style new line separated
+def unique_list(l):
+    """Remove duplicated from a list
 
     Args:
-        file_path: A fill path to a text file.
+        l: A list
     
     Returns:
-        List of all lines in the file. Or None if the file does not exist
-    
+        The input list minus any duplicates
     """
 
-    # Check if the file exist
-    if not os.path.isfile(file_path):
-        return(None)
-
-    # Else load the file
-    f = open(file_path, 'r')
-    lines = [line for line in f]
-    f.close()
-    return(lines)
+    return(list(dict.fromkeys(l)))

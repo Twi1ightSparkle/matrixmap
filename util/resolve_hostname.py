@@ -20,11 +20,11 @@ def resolve_well_known(hostname):
     the delegated hostname and port, or return an empty string if no well known server file exists.
 
     Args:
-        hostname: A hostname as found in the Matrix ID
+        hostname: A hostname as found in the Matrix ID.
     
     Returns:
         Delegated hostname and port in the format sub.domain.tld:port:wellknown
-        Or an empty string
+        Or an empty string if no luck.
     """
 
     # Set a random valid user-agent
@@ -42,6 +42,7 @@ def resolve_well_known(hostname):
         dns.name.LabelTooLong,
         NameError,
         requests.exceptions.ConnectionError,
+        requests.exceptions.ConnectTimeout,
         requests.exceptions.InvalidURL,
         requests.exceptions.ReadTimeout,
         requests.exceptions.SSLError,
@@ -50,9 +51,9 @@ def resolve_well_known(hostname):
         ssl.SSLCertVerificationError,
         ssl.SSLError,
         UnicodeError,
+        urllib3.exceptions.ConnectTimeoutError,
         urllib3.exceptions.MaxRetryError,
         urllib3.exceptions.NewConnectionError
-
     ):
         return(None)
 
@@ -82,11 +83,11 @@ def resolve_srv(hostname):
     the delegated hostname, port and srv, or return an empty string if no well known server file exists.
 
     Args:
-        hostname: A hostname as found in the Matrix ID
+        hostname: A hostname as found in the Matrix ID.
     
     Returns:
         Delegated hostname and port in the format sub.domain.tld:port:srv
-        Or an empty string
+        Or an empty string if no luck.
     """
 
     # Turn off annoying logging to terminal from srv lookup
@@ -118,10 +119,10 @@ def resolve_delegated_homeserver(hostname):
     """Return delegated hostname and port from a hostname
 
     Tries to looks up well-known server file, then SRV DNS record.
-    If both fail, return the arg hostname with assumed port 8448
+    If both fail, return the arg hostname with assumed port 8448.
 
     Args:
-        hostname: hostname (the domain part of a MAtrix ID)
+        hostname: A hostname (the domain part of a Matrix ID).
 
     Returns:
         A string containing delegated hostname and port for the hostname in this format:
@@ -129,8 +130,9 @@ def resolve_delegated_homeserver(hostname):
     """
 
     # If hostname is an ip
-    pattern = re.compile(r'\d+\.\d+\.\d+\.\d')
-    if pattern.match(hostname):
+    re_ipv4 = re.compile(r'((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]))')
+    re_ipv6 = re.compile(r'((([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])))')
+    if re_ipv4.match(hostname) or re_ipv6.match(hostname):
         return(f'{hostname}:8448:ip')
 
     # If a well-known
@@ -147,18 +149,19 @@ def resolve_delegated_homeserver(hostname):
     return(f'{hostname}:8448:a')
 
 
-def https_download(hostname, path, port=443):
+def https_download(hostname, path, port=443, raw=False):
     """Try and download something over https
 
-    Try and download something from https. Decode and return whatever it downloaded or return empty of download failed
+    Try and download something from https. Decode and return whatever it downloaded or return empty of download failed.
 
     Args:
-        hostname: A hostname or an IP address
-        path: What do download. For example /_matrix/static
-        port: A port, default 443
+        hostname: A hostname or an IP address.
+        path: What do download. For example /_matrix/static.
+        port: A port. Default 443.
+        raw: Return raw json data, assuming no errors. Defult False
     
     Returns:
-        Some decoded content if there is some or not 404. If 404 or otherwise fail, return empty string
+        Some decoded content if there is some and not 404. If 404 or otherwise fail, return empty string.
     """
 
     # Set a random valid user-agent
@@ -171,11 +174,12 @@ def https_download(hostname, path, port=443):
     # Try and download
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     try:
-        http_request = requests.get(url, headers=headers, allow_redirects=True, verify=False, timeout=3)
+        http_request = requests.get(url, headers=headers, allow_redirects=True, verify=False, timeout=1)
     except (
         dns.name.LabelTooLong,
         NameError,
         requests.exceptions.ConnectionError,
+        requests.exceptions.ConnectTimeout,
         requests.exceptions.InvalidURL,
         requests.exceptions.ReadTimeout,
         requests.exceptions.SSLError,
@@ -184,15 +188,18 @@ def https_download(hostname, path, port=443):
         ssl.SSLCertVerificationError,
         ssl.SSLError,
         UnicodeError,
+        urllib3.exceptions.ConnectTimeoutError,
         urllib3.exceptions.MaxRetryError,
         urllib3.exceptions.NewConnectionError
-
     ):
         return(None)
 
     # If not 200
     if not http_request.status_code == 200:
         return(None)
+
+    if raw:
+        return(http_request.json())
 
     # Try and decode json, then split domain.tld:port
     try:
@@ -214,7 +221,7 @@ def check_matrix_server(hostname):
     """Check if and save there is a Synapse or Dendrite server on a url
 
     Check if there is a Synapse or Dendrite server on a url:port. If there is a Synapse/Dendrite there,
-    look up IP and version, then store information to database
+    look up IP and version.
 
     Args:
         hostname: Some URL from Matrix IDs in format sub.domain.com
@@ -267,14 +274,13 @@ def check_matrix_server(hostname):
             dns.name.LabelTooLong,
             NameError,
             requests.exceptions.ConnectionError,
+            requests.exceptions.ConnectTimeout,
             requests.exceptions.InvalidURL,
             requests.exceptions.ReadTimeout,
-            requests.exceptions.SSLError,
             requests.exceptions.TooManyRedirects,
             socket.timeout,
-            ssl.SSLCertVerificationError,
-            ssl.SSLError,
             UnicodeError,
+            urllib3.exceptions.ConnectTimeoutError,
             urllib3.exceptions.MaxRetryError,
             urllib3.exceptions.NewConnectionError
         ):
@@ -286,11 +292,16 @@ def check_matrix_server(hostname):
         dns.name.LabelTooLong,
         NameError,
         requests.exceptions.ConnectionError,
+        requests.exceptions.ConnectTimeout,
         requests.exceptions.InvalidURL,
         requests.exceptions.ReadTimeout,
+        requests.exceptions.SSLError,
         requests.exceptions.TooManyRedirects,
         socket.timeout,
+        ssl.SSLCertVerificationError,
+        ssl.SSLError,
         UnicodeError,
+        urllib3.exceptions.ConnectTimeoutError,
         urllib3.exceptions.MaxRetryError,
         urllib3.exceptions.NewConnectionError
 

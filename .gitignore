@@ -3,7 +3,7 @@ __pycache__
 config.ini
 domains.txt
 homeservers.txt
-server_details.csv
+delegated_homeservers.db
 shodan-export-port-8448.json
 shodan-export-port-8448.json.gz
 shodan-export-port-8448 copy.json
