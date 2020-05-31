@@ -1,44 +1,38 @@
 [Global]
 # Set the directory relative to this script where data is stored
-data_directory : data
+data_directory: data
 
 
 [PostgreSQL]
 # Try and connect to PostgreSQL to load  hostnames [Yes/No]
 enabled: Yes
 # IP or domain to where the PostgreSQL server lives
-server: postgresql.example.com
-# POst to connect to PostgreSQl server on. Must be an integer
+server: dbserver
+# Post to connect to PostgreSQl server on. Must be an integer
 port: 5432
 # Name of the database to connect to
-database: synapse
+database: dbname
 # Username to authenticate with
-username: someuser
+username: dbuser
 # Password to authenticate with. % must be escaped with another %
-password: somepassword
-# Limit how many results to return from destinations table
-limit: 1000
+password: dbpassword
+# Limit how many results to return from destinations table. Must be an integer or None
+limit: 100
 
 
-[HomeserverFile]
+[Files]
 # File name for a list of homeserver hostnames
-filename: homeservers.txt
-
-
-[Output]
-# File name for a CSV to store homeserver delegated data
-homeservers: delegated_homeservers.csv
-
-
-[ProcessShodanExport]
+hs_filename: homeservers.txt
 # File name where Shodan data export is stored
-filename: shodan-export-port-8448.json
+shodan_filename: shodan-export-port-8448.json
+# File name for a SQLite3 db file to store homeserver delegated data
+delegated_hs_data: delegated_homeservers.db
+
+
+[Settings]
 # How many workers to run process_shodan_export.py with. Must be an integer
-workers: 100
-
-
-[ProcessHomeservers]
+shodan_workers: 100
 # How many workers to run process_homeservers.py with. Must be an integer
-workers: 100
+hs_workers: 100
 # Print a header to stdout. Disable when saving do a file. [Yes/No]
 debug: No
